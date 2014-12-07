@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EveryMic</title>
+
+  <script src="/js/adapter.js"></script>
+  <script data-main="main" src="/js/vendor/requirejs/require.js"></script>
+  <script>
+    require.config({
+      baseUrl: "/js",
+      packages: [
+        {
+          'name'     : 'when',
+          'location' : 'vendor/when',
+          'main'     : 'when'
+        }
+      ]
+    });
+  </script>
+
+</head>
+<body>
+</body>
+</html>
