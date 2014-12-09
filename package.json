@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "express": "4.10.4",
-    "socket.io": "1.2.1"
+    "socket.io": "1.2.1",
+    "socketio-wildcard": "0.1.1"
   }
 }

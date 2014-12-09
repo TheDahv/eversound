@@ -1,13 +1,16 @@
-define(function () {
+define(['broadcaster', 'speaker'], function (broadcaster, speaker) {
   var locationInfo, room, broadcasting = false;
 
-  locationInfo = document.location.pathname.slice(1).split('/');
+  locationInfo = document.location.pathname.slice(1).split('/').slice(1);
   room = locationInfo[0];
   broadcasting = locationInfo.length > 1 && locationInfo[1] == 'broadcasting';
 
   if (broadcasting) {
     document.querySelector('body').innerHTML = "Broadcasting in room " + room;
+    broadcaster.openChannel(room);
   } else {
-    document.querySelector('body').innerHTML = "Speaker for room " + room;
+    speaker.joinChannel(room);
   }
+
+  return;
 });

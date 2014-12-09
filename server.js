@@ -15,13 +15,14 @@ sendFile = function (fileName) {
   };
 };
 
-app.get('*', sendFile("index"));
+app.get('/channels/:room/:broadcaster?', sendFile("index"));
 
 server = app.listen(process.env.PORT || 3000, function () {
   console.log("Listening on %s:%s", server.address().address, server.address().port);
 });
 
 io = require('socket.io').listen(server);
+io.use(require('socketio-wildcard')());
 
 var DEFAULT_NAMESPACE = '/';
 var numSocketsInRoom = function (room) {
@@ -38,7 +39,39 @@ var log = function () {
   socket.emit('log', array);
 };
 
+var getSockets = function (data) {
+  return {
+    name: data.data[0],
+    data: data.data[1]
+  };
+  /*
+  return Object.keys(data)
+    .map(function (key) {
+      var payload = data[key].data;
+      return {
+        name: payload[0] || '',
+        data: payload[1] || {}
+      };
+    });
+  */
+};
+
+var getConnectionInfo = function (connName) {
+  var parts = connName.split(':'), parts, connInfo;
+
+  if (parts.length < 3) {
+    return {}
+  }
+
+  return {
+    type    : parts[0] || '',
+    channel : parts[1] || '',
+    action  : parts[2] || ''
+  }
+};
+
 io.sockets.on('connection', function (socket) {
+  /*
   socket.on('message', function (message) {
     log("Got message: ", message);
     socket.broadcast.emit('message', message);
@@ -64,5 +97,27 @@ io.sockets.on('connection', function (socket) {
 
     socket.emit('emit(): client ' + socket.id + ' joined room ' + room);
     socket.broadcast.emit('broadcast(): client ' + socket.id + ' joined room ' + room);
+  });
+  */
+
+  socket.on("*", function (data) {
+    var conn = getSockets(data);
+
+    var connInfo = getConnectionInfo(conn.name);
+    console.log("Received socket connection from ", conn.name);
+    //console.log(conn.data);
+    if (/candidate/i.test(conn.name)) {
+      console.log("CANDIDATE INFORMATION!!!");
+    }
+
+    var responseChannelName = [
+      connInfo.type === 'speaker' ? 'broadcaster' : 'speaker',
+      connInfo.channel,
+      connInfo.action
+    ].join(':');
+
+    console.log("Forwarding on to ", responseChannelName);
+    socket.broadcast.emit(responseChannelName, conn.data);
+
   });
 });
