@@ -52,7 +52,7 @@ define(['webrtc/utils', 'webrtc/audiovisualizer'], function (utils, visualizer) 
       function (err) {
         console.log("Error creating speaker offer: ", err);
       },
-      {"offerToReceiveAudio":true,"offerToReceiveVideo":true}
+      utils.speakerOfferConfig
     );
   };
 

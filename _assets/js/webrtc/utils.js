@@ -9,5 +9,11 @@ define(function () {
     ]
   };
 
+  exports.speakerOfferConfig = {
+    "offerToReceiveAudio": true,
+    "offerToReceiveVideo": false
+  };
+
+
   return exports;
 });

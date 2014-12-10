@@ -64,8 +64,7 @@ define(
         // setRemoteDescription:err
         function (err) {
           console.log("setRemoteDescription error", err);
-        },
-        {"offerToReceiveAudio":true,"offerToReceiveVideo":true}
+        }
       );
 
       socket.on(messageName(channel, 'speaker-ice'), function (speakerIce) {
