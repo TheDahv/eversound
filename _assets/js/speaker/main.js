@@ -2,18 +2,10 @@
 // - https://www.webrtc-experiment.com/docs/webrtc-for-beginners.html#waitUntilRemoteStreamStartsFlowing
 // - http://stackoverflow.com/questions/24287054/chrome-wont-play-webaudio-getusermedia-via-webrtc-peer-js
 // - http://servicelab.org/2013/07/24/streaming-audio-between-browsers-with-webrtc-and-webaudio/
-define(['webrtc/audiovisualizer'], function (visualizer) {
+define(['webrtc/utils', 'webrtc/audiovisualizer'], function (utils, visualizer) {
   var exports = {};
   var messageName = function (channel, action) {
     return ['speaker', channel, action].join(':');
-  };
-
-  var server = {
-    iceServers: [
-      { "url": "stun:stun.l.google.com:19302"},
-      { "url": "stun:stun.services.mozilla.com" },
-      { "url": "stun:23.21.150.121"}
-    ]
   };
 
   exports.createAndSendCandidate = function (socket, conn, channel) {
@@ -66,7 +58,7 @@ define(['webrtc/audiovisualizer'], function (visualizer) {
 
   exports.joinChannel = function (channel) {
     var socket = io(document.location.host),
-      peerConn = new RTCPeerConnection(server);
+      peerConn = new RTCPeerConnection(utils.serverConfig);
 
     exports.createAndSendCandidate(socket, peerConn, channel);
     exports.receiveCandidateResponse(socket, peerConn, channel);

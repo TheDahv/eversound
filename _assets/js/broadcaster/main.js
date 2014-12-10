@@ -1,16 +1,10 @@
-define(['webrtc/media', 'webrtc/audiovisualizer'], function (media, visualizer) {
+define(
+  ['webrtc/utils', 'webrtc/media', 'webrtc/audiovisualizer'],
+  function (utils, media, visualizer) {
 
   var exports = {};
   var messageName = function (channel, action) {
     return ['broadcaster', channel, action].join(':');
-  };
-
-  var server = {
-    iceServers: [
-      { "url": "stun:stun.l.google.com:19302"},
-      { "url": "stun:stun.services.mozilla.com" },
-      { "url": "stun:23.21.150.121"}
-    ]
   };
 
   exports.openChannel = function (channel) {
@@ -38,7 +32,7 @@ define(['webrtc/media', 'webrtc/audiovisualizer'], function (media, visualizer) 
     socket.on(messageName(channel, 'description'), function (speakerDesc) {
       console.log("Speaker joined!");
       // Set up Peer Connection information
-      var peerConn = new RTCPeerConnection(server);
+      var peerConn = new RTCPeerConnection(utils.serverConfig);
 
       // Generate broadcaster ICE candidate and send back
       peerConn.onicecandidate = function (broadcasterIce) {
