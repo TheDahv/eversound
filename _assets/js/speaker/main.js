@@ -11,30 +11,12 @@ define(
     return ['speaker', channel, action].join(':');
   };
 
-  var createAndSendCandidate = function (socket, conn, channel) {
-    conn.onicecandidate = function (evt) {
-      console.log("Sending speaker ice...");
-      socket.emit(messageName(channel, 'speaker-ice'), {
-        "candidate": evt.candidate
-      });
-    };
-  };
-
-  var receiveCandidateResponse = function (socket, conn, channel) {
-    socket.on(messageName(channel, 'broadcaster-ice'), function (broadcasterIce) {
-      if (broadcasterIce.candidate) {
-        console.log("Adding broadcaster ice");
-        conn.addIceCandidate(new RTCIceCandidate(broadcasterIce.candidate));
-      }
-    });
-  };
-
   exports.joinChannel = function (channel) {
     var socket = io(document.location.host),
       peerConn = new RTCPeerConnection(utils.serverConfig);
 
-    createAndSendCandidate(socket, peerConn, channel);
-    receiveCandidateResponse(socket, peerConn, channel);
+    connections.handleLocalCandidate(socket, messageName(channel, 'speaker-ice'), peerConn);
+    connections.handleRemoteCandidate(socket, messageName(channel, 'broadcaster-ice'), peerConn);
 
     connections.createOffer(socket, peerConn, channel)
       .then(connections.sendOffer(messageName(channel, "description")))

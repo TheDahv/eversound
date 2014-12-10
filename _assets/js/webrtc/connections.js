@@ -120,4 +120,5 @@ define(['webrtc/utils', 'when'], function (utils, w) {
   };
 
   return exports;
+
 });
