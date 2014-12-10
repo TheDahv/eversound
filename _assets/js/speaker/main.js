@@ -39,9 +39,16 @@ define(
     connections.createOffer(socket, peerConn, channel)
       .then(connections.sendOffer(messageName(channel, "description")))
       .then(connections.handleRemoteDescription(messageName(channel, "description-response")))
-      .else(function (err) {
-        console.log("Error setting up Peer connection!", err);
-      });
+      .done(
+        // success
+        function () {
+          console.log("Speaker peer connection set up complete!");
+        },
+        // fail
+        function (err) {
+          console.log("Speaker peer connection set up failed", err);
+        }
+      );
 
     peerConn.onaddstream = function (event) {
       console.log("Got a stream!");

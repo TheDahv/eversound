@@ -39,6 +39,40 @@ define(['webrtc/utils', 'when'], function (utils, w) {
     };
   };
 
+  exports.handleOffer = function (conn, desc) {
+    var deferred = w.defer();
+
+    conn.setRemoteDescription(new RTCSessionDescription(desc.description),
+      // success
+      function () {
+        deferred.resolve(conn);
+      },
+      // fail
+      deferred.reject
+    );
+
+    return deferred.promise;
+  };
+
+  exports.createAnswer = function (socket, socketChannel) {
+    return function (conn) {
+      var deferred = w.defer();
+
+      // Respond back to request to peer connect
+      conn.createAnswer(function (description) {
+        conn.setLocalDescription(description, function () {
+          // Send broadcaster description back to speaker
+          socket.emit(socketChannel, {
+            "description": description
+          });
+          deferred.resolve();
+        });
+      });
+
+      return deferred.promise;
+    };
+  };
+
   exports.handleRemoteDescription = function (socketChannel) {
     return function (descriptionInfo) {
       var deferred = w.defer(),
@@ -63,6 +97,26 @@ define(['webrtc/utils', 'when'], function (utils, w) {
 
       return deferred.promise;
     };
+  };
+
+  exports.handleLocalCandidate = function (socket, socketChannel, conn) {
+    conn.onicecandidate = function (ice) {
+      if (ice.candidate) {
+        console.log("Sending candidate on channel:", socketChannel);
+        socket.emit(socketChannel, {
+          candidate: ice.candidate
+        });
+      }
+    };
+  };
+
+  exports.handleRemoteCandidate = function (socket, socketChannel, conn) {
+    socket.on(socketChannel, function (ice) {
+      if (ice.candidate) {
+        console.log("Received remote candidate on channel:", socketChannel);
+        conn.addIceCandidate(new RTCIceCandidate(ice.candidate));
+      }
+    });
   };
 
   return exports;
