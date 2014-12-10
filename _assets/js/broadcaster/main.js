@@ -1,8 +1,16 @@
-define(['webrtc/media'], function (media) {
+define(['webrtc/media', 'webrtc/audiovisualizer'], function (media, visualizer) {
 
   var exports = {};
   var messageName = function (channel, action) {
     return ['broadcaster', channel, action].join(':');
+  };
+
+  var server = {
+    iceServers: [
+      { "url": "stun:stun.l.google.com:19302"},
+      { "url": "stun:stun.services.mozilla.com" },
+      { "url": "stun:23.21.150.121"}
+    ]
   };
 
   exports.openChannel = function (channel) {
@@ -14,6 +22,12 @@ define(['webrtc/media'], function (media) {
       function (stream) {
         audioStream = stream;
         console.log("Microphone set up and waiting for speakers to connect...");
+
+        var audioContext = new AudioContext();
+        var streamSource = audioContext.createMediaStreamSource(stream);
+
+        visualizer.visualizeAudio('audioSignal', audioContext, streamSource);
+
       },
       function (err) {
         console.log(err);
@@ -24,7 +38,7 @@ define(['webrtc/media'], function (media) {
     socket.on(messageName(channel, 'description'), function (speakerDesc) {
       console.log("Speaker joined!");
       // Set up Peer Connection information
-      var peerConn = new RTCPeerConnection({ "iceServers": [{ "url": "stun:stun.l.google.com:19302" }] }); //{ "iceServers": [{ "url": "stun:stun.l.google.com:19302" }] });
+      var peerConn = new RTCPeerConnection(server);
 
       // Generate broadcaster ICE candidate and send back
       peerConn.onicecandidate = function (broadcasterIce) {
@@ -50,9 +64,6 @@ define(['webrtc/media'], function (media) {
               socket.emit(messageName(channel, 'description-response'), {
                 description: broadcastDescription
               });
-
-              console.log("Stream add attempt 2");
-              peerConn.addStream(audioStream);
             });
           });
         },
@@ -60,7 +71,7 @@ define(['webrtc/media'], function (media) {
         function (err) {
           console.log("setRemoteDescription error", err);
         },
-        { 'mandatory': { 'OfferToReceiveAudio': true, 'OfferToReceiveVideo': true } }
+        {"offerToReceiveAudio":true,"offerToReceiveVideo":true}
       );
 
       socket.on(messageName(channel, 'speaker-ice'), function (speakerIce) {

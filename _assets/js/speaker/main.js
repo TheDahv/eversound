@@ -1,12 +1,25 @@
-define(function () {
+// Helpful links
+// - https://www.webrtc-experiment.com/docs/webrtc-for-beginners.html#waitUntilRemoteStreamStartsFlowing
+// - http://stackoverflow.com/questions/24287054/chrome-wont-play-webaudio-getusermedia-via-webrtc-peer-js
+// - http://servicelab.org/2013/07/24/streaming-audio-between-browsers-with-webrtc-and-webaudio/
+define(['webrtc/audiovisualizer'], function (visualizer) {
   var exports = {};
   var messageName = function (channel, action) {
     return ['speaker', channel, action].join(':');
   };
 
+  var server = {
+    iceServers: [
+      { "url": "stun:stun.l.google.com:19302"},
+      { "url": "stun:stun.services.mozilla.com" },
+      { "url": "stun:23.21.150.121"}
+    ]
+  };
+
   exports.createAndSendCandidate = function (socket, conn, channel) {
     conn.onicecandidate = function (evt) {
-      socket.emit(messageName(channel, 'candidate'), {
+      console.log("Sending speaker ice...");
+      socket.emit(messageName(channel, 'speaker-ice'), {
         "candidate": evt.candidate
       });
     };
@@ -47,33 +60,24 @@ define(function () {
       function (err) {
         console.log("Error creating speaker offer: ", err);
       },
-      { 'mandatory': { 'OfferToReceiveAudio': true, 'OfferToReceiveVideo': true } }
+      {"offerToReceiveAudio":true,"offerToReceiveVideo":true}
     );
   };
 
   exports.joinChannel = function (channel) {
     var socket = io(document.location.host),
-      peerConn = new RTCPeerConnection({ "iceServers": [{ "url": "stun:stun.l.google.com:19302" }] }); //{ "iceServers": [{ "url": "stun:stun.l.google.com:19302" }] });
+      peerConn = new RTCPeerConnection(server);
 
-    peerConn.onicecandidate = function (evt) {
-      console.log("Sending speaker ice...");
-      socket.emit(messageName(channel, 'speaker-ice'), {
-        "candidate": evt.candidate
-      });
-    };
-
-    //exports.createAndSendCandidate(socket, peerConn, channel);
+    exports.createAndSendCandidate(socket, peerConn, channel);
     exports.receiveCandidateResponse(socket, peerConn, channel);
     exports.createAndSendOffer(socket, peerConn, channel);
 
     peerConn.onaddstream = function (event) {
       console.log("Got a stream!");
-      console.log(event);
 
-      var stream = event.stream;
-      var audioContext = new AudioContext();
-      var streamSource = audioContext.createMediaStreamSource(stream);
-      streamSource.connect(audioContext.destination);
+      var player = new Audio();
+      attachMediaStream(player, event.stream);
+      player.play();
     };
   };
 

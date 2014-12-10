@@ -6,7 +6,6 @@ define(['broadcaster', 'speaker'], function (broadcaster, speaker) {
   broadcasting = locationInfo.length > 1 && locationInfo[1] == 'broadcasting';
 
   if (broadcasting) {
-    document.querySelector('body').innerHTML = "Broadcasting in room " + room;
     broadcaster.openChannel(room);
   } else {
     speaker.joinChannel(room);
