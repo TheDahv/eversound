@@ -7,7 +7,7 @@ define(function () {
     var analyser, processorNode, canvas, canvasCtx, canvasWidth, canvasHeight,
       getAverageVolume;
 
-    canvas       = document.getElementById(canvasDOMId)
+    canvas       = document.getElementById(canvasDOMId);
     canvasCtx    = canvas.getContext("2d");
     canvasWidth  = canvas.width;
     canvasHeight = canvas.height;
