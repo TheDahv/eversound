@@ -59,15 +59,20 @@ define(['webrtc/utils', 'when'], function (utils, w) {
       var deferred = w.defer();
 
       // Respond back to request to peer connect
-      conn.createAnswer(function (description) {
-        conn.setLocalDescription(description, function () {
-          // Send broadcaster description back to speaker
-          socket.emit(socketChannel, {
-            "description": description
+      conn.createAnswer(
+        // success
+        function (description) {
+          conn.setLocalDescription(description, function () {
+            // Send broadcaster description back to speaker
+            socket.emit(socketChannel, {
+              "description": description
+            });
+            deferred.resolve();
           });
-          deferred.resolve();
-        });
-      });
+        },
+        // fail
+        deferred.reject
+      );
 
       return deferred.promise;
     };
