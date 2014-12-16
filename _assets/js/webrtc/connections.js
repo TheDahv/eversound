@@ -78,14 +78,18 @@ define(['webrtc/utils', 'when'], function (utils, w) {
     };
   };
 
-  exports.handleRemoteDescription = function (socketChannel) {
+  exports.handleRemoteDescription = function (socketChannel, listenOnce) {
+    if (typeof listenOnce === 'undefined') {
+      listenOnce = false;
+    }
     return function (descriptionInfo) {
       var deferred = w.defer(),
           socket   = descriptionInfo.socket,
           channel  = descriptionInfo.channel,
-          conn     = descriptionInfo.conn;
+          conn     = descriptionInfo.conn,
+          socketFn = listenOnce ? 'once' : 'on';
 
-      socket.on(socketChannel, function (desc) {
+      socket[socketFn](socketChannel, function (desc) {
         conn.setRemoteDescription(new RTCSessionDescription(desc.description),
           // success
           function () {
@@ -115,8 +119,13 @@ define(['webrtc/utils', 'when'], function (utils, w) {
     };
   };
 
-  exports.handleRemoteCandidate = function (socket, socketChannel, conn) {
-    socket.on(socketChannel, function (ice) {
+  exports.handleRemoteCandidate = function (socket, socketChannel, conn, listenOnce) {
+    var socketFn;
+    if (typeof listenOnce === 'undefined') {
+      listenOnce = false;
+    }
+    socketFn = listenOnce ? 'once' : 'on';
+    socket[socketFn](socketChannel, function (ice) {
       if (ice.candidate) {
         console.log("Received remote candidate on channel:", socketChannel);
         conn.addIceCandidate(new RTCIceCandidate(ice.candidate));
