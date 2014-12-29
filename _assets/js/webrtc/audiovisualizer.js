@@ -3,7 +3,12 @@
 define(['../vendor/raphael/raphael-min'], function (Raphael) {
   var exports = {};
 
+  // Audio Processing Constants
+  var TIME_SMOOTHING_CONSTANT = 0.3,
+      FFT_SIZE = 1024;
+
   exports.visualizeAudio = function (canvasDOMId, context, stream) {
+    // TODO: Clean up unused variables
     var analyser, processorNode, canvas, canvasCtx, canvasWidth, canvasHeight,
       getAverageVolume;
 
@@ -13,8 +18,8 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
     canvasHeight = canvas.height;
 
     analyser = context.createAnalyser();
-    analyser.timeSmoothingConstant = 0.3;
-    analyser.fftSize = 1024;
+    analyser.timeSmoothingConstant = TIME_SMOOTHING_CONSTANT;
+    analyser.fftSize = FFT_SIZE;
 
     stream.connect(analyser);
 
@@ -47,27 +52,68 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
     processAudio();
   };
 
+  // Constants for audioRings
+  var RING_ANIMATE_DURATION = 1500,
+      RING_ANIMATE_EASING = 'ease-in-out',
+      MIN_AMPLITUDE_THRESHOLD = 5,
+      MAX_AMPLITUDE_THRESHOLD = 40;
+
+  // Helpers for audioRings
   var removeElement = function () { this.remove(); };
+  var sum = function (arrayLike) {
+    return Array.prototype.reduce.call(arrayLike,
+      function (total, item) {
+        return total + item;
+      },
+      0
+    );
+  };
+
   exports.audioRings = function (canvasDOMId, context, stream) {
+    // Drawing area
     var paper = Raphael(canvasDOMId),
         paperWidth = paper.width,
-        paperHeight = paper.height;
+        paperHeight = paper.height,
+    // Audio processing
+        analyser, processAudio;
 
-    var c = paper.circle(paperWidth / 2, paperHeight / 2, 40);
-    c.animate(
-      { r: paperHeight / 2 },
-      1500,
-      'ease-in-out',
-      removeElement
-    );
+    analyser = context.createAnalyser();
+    analyser.timeSmoothingConstant = TIME_SMOOTHING_CONSTANT;
+    analyser.fftSize = FFT_SIZE;
 
-    var c2 = paper.circle(paperWidth / 2, paperHeight / 2, 40);
-    c2.animate(
-      { r: paperHeight / 4 },
-      1500,
-      'ease-in-out',
-      removeElement
-    );
+    stream.connect(analyser);
+
+    // Define an audio loop worker, and immediately run it
+    (processAudio = function () {
+      requestAnimationFrame(function () {
+        var array, averageAmplitude, amplitudeRadius;
+
+        // Load current sound frequency data into array
+        array = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(array);
+
+        // Calculate the average amplitude across the frequencies
+        averageAmplitude = sum(array) / array.length;
+
+        // If we have enough sound, create a circle whose radius
+        // represents the amplitude of the sound...
+        // Louder sounds should have larger circles, etc.
+        if (averageAmplitude >= MIN_AMPLITUDE_THRESHOLD) {
+          amplitudeRadius = averageAmplitude * MAX_AMPLITUDE_THRESHOLD / MIN_AMPLITUDE_THRESHOLD;
+          // Draw the circle in the middle of the canvas and immediately animate it
+          paper.circle(paperWidth / 2, paperHeight / 2, 1)
+            .animate(
+              { r: amplitudeRadius / 2 },
+              RING_ANIMATE_DURATION,
+              RING_ANIMATE_EASING,
+              removeElement
+            );
+        }
+
+        // Run the loop again
+        processAudio();
+      });
+    })();
   };
 
   return exports;
