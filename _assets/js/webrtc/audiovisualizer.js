@@ -1,6 +1,6 @@
 // Helpful links
 // - https://www.webrtc-experiment.com/docs/webrtc-for-beginners.html#waitUntilRemoteStreamStartsFlowing
-define(function () {
+define(['../vendor/raphael/raphael-min'], function (Raphael) {
   var exports = {};
 
   exports.visualizeAudio = function (canvasDOMId, context, stream) {
@@ -45,6 +45,29 @@ define(function () {
       });
     };
     processAudio();
+  };
+
+  var removeElement = function () { this.remove(); };
+  exports.audioRings = function (canvasDOMId, context, stream) {
+    var paper = Raphael(canvasDOMId),
+        paperWidth = paper.width,
+        paperHeight = paper.height;
+
+    var c = paper.circle(paperWidth / 2, paperHeight / 2, 40);
+    c.animate(
+      { r: paperHeight / 2 },
+      1500,
+      'ease-in-out',
+      removeElement
+    );
+
+    var c2 = paper.circle(paperWidth / 2, paperHeight / 2, 40);
+    c2.animate(
+      { r: paperHeight / 4 },
+      1500,
+      'ease-in-out',
+      removeElement
+    );
   };
 
   return exports;

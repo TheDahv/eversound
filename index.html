@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <title>EveryMic</title>
 
+  <style>
+    #audioRings {
+      height: 400px;
+      width: 400px;
+    }
+  </style>
+
   <script src="/js/adapter.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script data-main="/js/main" src="/js/vendor/requirejs/require.js"></script>
@@ -25,5 +32,6 @@
 <body>
 
   <canvas id="audioSignal"></canvas>
+  <div id="audioRings"></div>
 </body>
 </html>

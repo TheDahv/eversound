@@ -21,6 +21,7 @@ define(
         var streamSource = audioContext.createMediaStreamSource(stream);
 
         visualizer.visualizeAudio('audioSignal', audioContext, streamSource);
+        visualizer.audioRings('audioRings', audioContext, streamSource);
 
       },
       function (err) {
