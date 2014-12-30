@@ -117,6 +117,7 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
             paper.circle(paperWidth / 2, paperHeight / 2, 1)
               .attr({
                 fill: "#F00000",
+                stroke: '#F00000'
               })
               .animate(
               {

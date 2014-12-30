@@ -1,0 +1,29 @@
+html,body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #333;
+}
+
+$ringsHeight: 100%;
+
+h1 {
+  font-family: Comfortaa, sans-serif;
+  font-size: 4em;
+  font-variant: small-caps;
+
+  text-align: center;
+  margin-top: 2em;
+  color: #FFFFD0;
+
+}
+
+#audioRings {
+  height: $ringsHeight;
+  width: $ringsHeight;
+  position: absolute;
+  top: 0; left: 0;
+}
