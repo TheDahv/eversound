@@ -20,7 +20,6 @@ define(
         var audioContext = new AudioContext();
         var streamSource = audioContext.createMediaStreamSource(stream);
 
-        visualizer.visualizeAudio('audioSignal', audioContext, streamSource);
         visualizer.audioRings('audioRings', audioContext, streamSource);
 
       },
