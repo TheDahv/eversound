@@ -54,6 +54,7 @@ define(
       var ctx = new AudioContext();
       var src = ctx.createMediaStreamSource(event.stream);
       visualizer.visualizeAudio('audioSignal', ctx, src);
+      visualizer.audioRings('audioRings', ctx, src);
     };
   };
 

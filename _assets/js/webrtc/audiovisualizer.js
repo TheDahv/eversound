@@ -121,7 +121,7 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
               .animate(
               {
                 r: sampleAverage / 2,
-                opacity: 0.5
+                opacity: 0.25
               },
                 RING_ANIMATE_DURATION,
                 RING_ANIMATE_EASING,
