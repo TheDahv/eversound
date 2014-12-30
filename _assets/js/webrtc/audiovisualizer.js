@@ -107,8 +107,8 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
         // but only if the sample has a general upward trend
         if (amplitudeSamplesBuffer.length >= AMPLITUDE_SAMPLE_SIZE) {
           // Louder sounds should have larger circles, etc.
-          sampleAverage = (sum(amplitudeSamplesBuffer) / amplitudeSamplesBuffer.length)
-            * MAX_AMPLITUDE_THRESHOLD / MIN_AMPLITUDE_THRESHOLD;
+          sampleAverage = (sum(amplitudeSamplesBuffer) / amplitudeSamplesBuffer.length) *
+            MAX_AMPLITUDE_THRESHOLD / MIN_AMPLITUDE_THRESHOLD;
 
           // Simplistic, naive way to determine if our samples are increasing
           // or decreasing in volume
