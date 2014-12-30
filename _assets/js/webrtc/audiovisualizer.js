@@ -56,7 +56,8 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
   var RING_ANIMATE_DURATION = 1500,
       RING_ANIMATE_EASING = 'ease-in-out',
       MIN_AMPLITUDE_THRESHOLD = 5,
-      MAX_AMPLITUDE_THRESHOLD = 40;
+      MAX_AMPLITUDE_THRESHOLD = 40,
+      AMPLITUDE_SAMPLE_SIZE = 5;
 
   // Helpers for audioRings
   var removeElement = function () { this.remove(); };
@@ -75,7 +76,8 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
         paperWidth = paper.width,
         paperHeight = paper.height,
     // Audio processing
-        analyser, processAudio;
+        analyser, processAudio,
+        amplitudeSamplesBuffer = [];
 
     analyser = context.createAnalyser();
     analyser.timeSmoothingConstant = TIME_SMOOTHING_CONSTANT;
@@ -86,28 +88,49 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
     // Define an audio loop worker, and immediately run it
     (processAudio = function () {
       requestAnimationFrame(function () {
-        var array, averageAmplitude, amplitudeRadius;
+        var array, averageAmplitude, amplitudeRadius,
+            sampleAverage, sampleUpwardTrend = false;
 
         // Load current sound frequency data into array
         array = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(array);
 
         // Calculate the average amplitude across the frequencies
+        // and add it to our sample if it is loud enough
         averageAmplitude = sum(array) / array.length;
-
-        // If we have enough sound, create a circle whose radius
-        // represents the amplitude of the sound...
-        // Louder sounds should have larger circles, etc.
         if (averageAmplitude >= MIN_AMPLITUDE_THRESHOLD) {
-          amplitudeRadius = averageAmplitude * MAX_AMPLITUDE_THRESHOLD / MIN_AMPLITUDE_THRESHOLD;
-          // Draw the circle in the middle of the canvas and immediately animate it
-          paper.circle(paperWidth / 2, paperHeight / 2, 1)
-            .animate(
-              { r: amplitudeRadius / 2 },
-              RING_ANIMATE_DURATION,
-              RING_ANIMATE_EASING,
-              removeElement
-            );
+          amplitudeSamplesBuffer.push(averageAmplitude);
+        }
+
+        // If we have enough sound in the buffer, create a circle whose radius
+        // represents the amplitude of the sound,
+        // but only if the sample has a general upward trend
+        if (amplitudeSamplesBuffer.length >= AMPLITUDE_SAMPLE_SIZE) {
+          // Louder sounds should have larger circles, etc.
+          sampleAverage = (sum(amplitudeSamplesBuffer) / amplitudeSamplesBuffer.length)
+            * MAX_AMPLITUDE_THRESHOLD / MIN_AMPLITUDE_THRESHOLD;
+
+          // Simplistic, naive way to determine if our samples are increasing
+          // or decreasing in volume
+          if (amplitudeSamplesBuffer[0] < amplitudeSamplesBuffer[amplitudeSamplesBuffer.length - 1]) {
+            // Draw the circle in the middle of the canvas and immediately animate it
+            paper.circle(paperWidth / 2, paperHeight / 2, 1)
+              .attr({
+                fill: "#F00000",
+              })
+              .animate(
+              {
+                r: sampleAverage / 2,
+                opacity: 0.5
+              },
+                RING_ANIMATE_DURATION,
+                RING_ANIMATE_EASING,
+                removeElement
+              );
+          }
+
+          // Reset sample buffer
+          amplitudeSamplesBuffer = [];
         }
 
         // Run the loop again
