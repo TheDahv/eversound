@@ -76,8 +76,7 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
         paperWidth = paper.width,
         paperHeight = paper.height,
     // Audio processing
-        analyser, processAudio,
-        amplitudeSamplesBuffer = [];
+        analyser, processAudio;
 
     analyser = context.createAnalyser();
     analyser.timeSmoothingConstant = TIME_SMOOTHING_CONSTANT;
@@ -86,7 +85,7 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
     stream.connect(analyser);
 
     // Define an audio loop worker, and immediately run it
-    (processAudio = function () {
+    (processAudio = function (amplitudeSamplesBuffer) {
       requestAnimationFrame(function () {
         var array, averageAmplitude, amplitudeRadius,
             sampleAverage, sampleUpwardTrend = false;
@@ -135,9 +134,9 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
         }
 
         // Run the loop again
-        processAudio();
+        processAudio(amplitudeSamplesBuffer);
       });
-    })();
+    })([]);
   };
 
   return exports;
