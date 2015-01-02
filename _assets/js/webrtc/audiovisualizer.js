@@ -9,8 +9,7 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
 
   exports.visualizeAudio = function (canvasDOMId, context, stream) {
     // TODO: Clean up unused variables
-    var analyser, processorNode, canvas, canvasCtx, canvasWidth, canvasHeight,
-      getAverageVolume;
+    var analyser, canvas, canvasCtx, canvasWidth, canvasHeight;
 
     canvas       = document.getElementById(canvasDOMId);
     canvasCtx    = canvas.getContext("2d");
@@ -25,7 +24,7 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
 
     var processAudio = function () {
       requestAnimationFrame(function () {
-        var array, average;
+        var array;
 
         array = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(array);
@@ -87,8 +86,7 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
     // Define an audio loop worker, and immediately run it
     (processAudio = function (amplitudeSamplesBuffer) {
       requestAnimationFrame(function () {
-        var array, averageAmplitude, amplitudeRadius,
-            sampleAverage, sampleUpwardTrend = false;
+        var array, averageAmplitude, sampleAverage;
 
         // Load current sound frequency data into array
         array = new Uint8Array(analyser.frequencyBinCount);

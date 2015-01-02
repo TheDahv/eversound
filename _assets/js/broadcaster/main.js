@@ -8,20 +8,21 @@ define(
   };
 
   exports.openChannel = function (channel) {
-    var socket = io(document.location.host),
-      audioSig, audioStream, connInfo = {};
+    var socket = io(document.location.host), audioStream;
 
     // Set up local audio source
     media.initializeLocalMedia({ audio: true, video: false }).done(
       function (stream) {
-        audioStream = stream;
         console.log("Microphone set up and waiting for speakers to connect...");
+
+        // Set library variable so peer connection handlers can
+        // access it
+        audioStream = stream;
 
         var audioContext = new AudioContext();
         var streamSource = audioContext.createMediaStreamSource(stream);
 
         visualizer.audioRings('audioRings', audioContext, streamSource);
-
       },
       function (err) {
         console.log(err);

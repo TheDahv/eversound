@@ -1,7 +1,7 @@
 define(['webrtc/utils', 'when'], function (utils, w) {
   var exports = {};
 
-  exports.createOffer = function (socket, conn, channel) {
+  exports.createOffer = function (socket, conn) {
     var deferred = w.defer();
 
     conn.createOffer(
@@ -10,7 +10,6 @@ define(['webrtc/utils', 'when'], function (utils, w) {
           deferred.resolve({
             "socket"  : socket,
             "conn"    : conn,
-            "channel" : channel,
             "desc"    : desc
           });
         });
@@ -26,7 +25,6 @@ define(['webrtc/utils', 'when'], function (utils, w) {
     return function (descriptionInfo) {
       var deferred = w.defer(),
         socket = descriptionInfo.socket,
-        channel = descriptionInfo.channel,
         desc = descriptionInfo.desc;
 
       socket.emit(socketChannel, {
@@ -85,7 +83,6 @@ define(['webrtc/utils', 'when'], function (utils, w) {
     return function (descriptionInfo) {
       var deferred = w.defer(),
           socket   = descriptionInfo.socket,
-          channel  = descriptionInfo.channel,
           conn     = descriptionInfo.conn,
           socketFn = listenOnce ? 'once' : 'on';
 

@@ -22,7 +22,25 @@ gulp.task('move-scripts', ['clean:scripts'], function () {
 
 gulp.task('lint', function () {
   return gulp.src([SCRIPTS_SRC, '!_assets/js/vendor/**', '!_assets/js/adapter.js'])
-    .pipe(jshint())
+    .pipe(jshint({
+      "unused": true,
+      "undef": true,
+      "globals": {
+        "console": false,
+        "document": false,
+        "navigator": false,
+        "requestAnimationFrame": false,
+        "Uint8Array": false,
+        "RTCSessionDescription": false,
+        "RTCIceCandidate": false,
+        "RTCPeerConnection": false,
+        "define": false,
+        "io": false,
+        "Audio": false,
+        "attachMediaStream": false,
+        "AudioContext": false
+      }
+    }))
     .pipe(jshint.reporter(require('jshint-stylish')));
 });
 

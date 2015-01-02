@@ -13,13 +13,12 @@ define(
 
   exports.joinChannel = function (channel) {
     var socket = io(document.location.host),
-      peerConn = new RTCPeerConnection(utils.serverConfig),
-      speakerAudio;
+      peerConn = new RTCPeerConnection(utils.serverConfig);
 
     connections.handleLocalCandidate(socket, messageName(channel, 'speaker-ice'), peerConn);
     connections.handleRemoteCandidate(socket, messageName(channel, 'broadcaster-ice'), peerConn);
 
-    connections.createOffer(socket, peerConn, channel)
+    connections.createOffer(socket, peerConn)
       .then(connections.sendOffer(messageName(channel, "description")))
       .then(connections.handleRemoteDescription(messageName(channel, "description-response"), true))
       .done(
