@@ -1,3 +1,10 @@
+/**
+* Broadcaster Module
+*
+* Manages connections and audio streams for the browser declaring itself
+* the broadcaster on a given channel. It also manages incoming requests to
+* connect as peer speakers and negotiates peer stream connections.
+*/
 define(
   ['webrtc/utils', 'webrtc/media', 'webrtc/audiovisualizer', 'webrtc/connections', 'when'],
   function (utils, media, visualizer, connections, w) {
@@ -7,6 +14,13 @@ define(
     return ['broadcaster', channel, action].join(':');
   };
 
+  /**
+  * Establishes the source audio stream for the broadcasting browser and
+  * handles incoming peer connections to stream audio as they come in
+  *
+  * @param {string} channel The name of the channel this broadcaster is
+  *   transmitting on
+  */
   exports.openChannel = function (channel) {
     var socket = io(document.location.host);
     media.initializeLocalMedia({ audio: true, video: false })

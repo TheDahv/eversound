@@ -1,3 +1,10 @@
+/**
+* WebRTC::AudioVisualizer Module
+*
+* A collection of functions that can visualize an incoming audio stream
+* leveraging the Web Audio API.
+*/
+
 // Helpful links
 // - https://www.webrtc-experiment.com/docs/webrtc-for-beginners.html#waitUntilRemoteStreamStartsFlowing
 define(['../vendor/raphael/raphael-min'], function (Raphael) {
@@ -7,8 +14,17 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
   var TIME_SMOOTHING_CONSTANT = 0.3,
       FFT_SIZE = 1024;
 
+  /**
+  * Visualizes the frequency data on the incoming sound stream in a
+  * flat graph format. The processing occurs in a loop that is throttled
+  * by the canvas animation frame rate.
+  *
+  * @param {string} canvasDOMId The ID name of the canvas element on which we
+  *   will draw the visualization. Note, no preceding '#' is required
+  * @param {AudioContext} context The Web Audio processing context
+  * @param {AudioStream} stream A Web Audio stream of audio signal
+  */
   exports.visualizeAudio = function (canvasDOMId, context, stream) {
-    // TODO: Clean up unused variables
     var analyser, canvas, canvasCtx, canvasWidth, canvasHeight;
 
     canvas       = document.getElementById(canvasDOMId);
@@ -69,6 +85,24 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
     );
   };
 
+  /**
+  * Sets up a visualization of expanding concentric rings, simulating
+  * the average amplitude of a given signal at a point in time.
+  *
+  * Amplitude is derived by taking the average of the a set of samples
+  * approximating the amplitude by averaging the set of frequencies values
+  * for a signal at a point in time.
+  *
+  * The algorithm also looks across its sample data to determine if the trend
+  * of amplitude samples is increasing or decreasing. Its effect is to only
+  * emit visualizations when the sound is increasing, but not when the
+  * sound fades or stops.
+  *
+  * @param {string} canvasDOMId The ID name of the canvas element on which we
+  *   will draw the visualization. Note, no preceding '#' is required
+  * @param {AudioContext} context The Web Audio processing context
+  * @param {AudioStream} stream A Web Audio stream of audio signal
+  */
   exports.audioRings = function (canvasDOMId, context, stream) {
     // Drawing area
     var paper = Raphael(canvasDOMId),
@@ -121,10 +155,10 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
                 r: sampleAverage / 2,
                 opacity: 0.25
               },
-                RING_ANIMATE_DURATION,
-                RING_ANIMATE_EASING,
-                removeElement
-              );
+              RING_ANIMATE_DURATION,
+              RING_ANIMATE_EASING,
+              removeElement
+            );
           }
 
           // Reset sample buffer
@@ -134,6 +168,8 @@ define(['../vendor/raphael/raphael-min'], function (Raphael) {
         // Run the loop again
         processAudio(amplitudeSamplesBuffer);
       });
+
+    // Immediately invoke processAudio with an empty samples buffer
     })([]);
   };
 

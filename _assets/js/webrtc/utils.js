@@ -1,3 +1,9 @@
+/**
+* WebRTC::Utils Module
+*
+* Common configurations and helpers for WebRTC API libraries
+*/
+
 define(function () {
   var exports = {};
 
@@ -13,7 +19,6 @@ define(function () {
     "offerToReceiveAudio": true,
     "offerToReceiveVideo": false
   };
-
 
   return exports;
 });

@@ -1,3 +1,9 @@
+/**
+* WebRTC::Media Module
+*
+* A set of normalizing functions and wrappers around interacting with
+* browser media APIs
+*/
 define(['when'], function (w) {
   var m = {};
 

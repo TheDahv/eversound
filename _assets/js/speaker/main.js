@@ -1,3 +1,10 @@
+/**
+* Speaker Module
+*
+* Manages connections and audio streams for browsers connecting as
+* output-only speakers
+*/
+
 // Helpful links
 // - https://www.webrtc-experiment.com/docs/webrtc-for-beginners.html#waitUntilRemoteStreamStartsFlowing
 // - http://stackoverflow.com/questions/24287054/chrome-wont-play-webaudio-getusermedia-via-webrtc-peer-js
@@ -11,6 +18,16 @@ define(
     return ['speaker', channel, action].join(':');
   };
 
+  /**
+  * Given a channel name, connect to the channel and request a peer stream
+  * of the audio signal from the broadcasting peer browser.
+  *
+  * Once received, connect the audio stream to our local audio context and
+  * visualize it so the client knows the stream is working.
+  *
+  * @param {string} channel The name of the room/channel the broadcaster is
+  *   transmitting on
+  */
   exports.joinChannel = function (channel) {
     var socket = io(document.location.host),
       peerConn = new RTCPeerConnection(utils.serverConfig);
