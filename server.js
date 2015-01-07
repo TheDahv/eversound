@@ -39,23 +39,30 @@ var log = function () {
   socket.emit('log', array);
 };
 
+/**
+* A convenience helper function to extract the incoming message's
+* channel name and data payload
+*
+* @param {data} The incoming socket connection object
+* @return {object} The interesting name and payload data for the socket connection
+*/
 var getSockets = function (data) {
   return {
     name: data.data[0],
     data: data.data[1]
   };
-  /*
-  return Object.keys(data)
-    .map(function (key) {
-      var payload = data[key].data;
-      return {
-        name: payload[0] || '',
-        data: payload[1] || {}
-      };
-    });
-  */
 };
 
+/**
+* The communication strategy for this application is to send messages on
+* channels in the format {Actor(Broadcaster|Speaker)}:{Channel Name}:{Action}
+*
+* This function breaks apart the single string into an object that is easier
+* to work with
+*
+* @param {string} connName Colon-delimited string of the incoming channel
+* @return {object} The connection information encoded in the channel name
+*/
 var getConnectionInfo = function (connName) {
   var parts = connName.split(':'), parts, connInfo;
 
@@ -70,46 +77,29 @@ var getConnectionInfo = function (connName) {
   }
 };
 
+/**
+* Signaling Channel
+*
+* Listens for incoming connections specifying actors, actions, and channel
+* names in their connection name
+*
+* Plays the role of the signaling server by forwarding messages on to
+* peer connections for a given channel.
+*/
 io.sockets.on('connection', function (socket) {
-  /*
-  socket.on('message', function (message) {
-    log("Got message: ", message);
-    socket.broadcast.emit('message', message);
-  });
-
-  socket.on('create or join', function (room) {
-    var numClients = numSocketsInRoom(room);
-
-    log('Room ' + room + ' has ' + numClients + ' client(s)');
-    log('Request to create or join room ' + room);
-
-    if (numClients === 0) {
-      socket.join(room);
-      socket.emit('created', room);
-    } else if (numClients === 1) {
-      io.sockets.in(room).emit('join', room);
-      socket.join(room);
-      socket.emit('joined', room);
-    } else {
-      // max 2 clients
-      socket.emit('full', room);
-    }
-
-    socket.emit('emit(): client ' + socket.id + ' joined room ' + room);
-    socket.broadcast.emit('broadcast(): client ' + socket.id + ' joined room ' + room);
-  });
-  */
-
+  // Listen for socket connections on all channels
   socket.on("*", function (data) {
+    // Get the interesting name and data information for this connection
     var conn = getSockets(data);
 
+    // Extract the incoming command information based on the connection
+    // channel name
     var connInfo = getConnectionInfo(conn.name);
     console.log("Received socket connection from ", conn.name);
-    //console.log(conn.data);
-    if (/candidate/i.test(conn.name)) {
-      console.log("CANDIDATE INFORMATION!!!");
-    }
 
+    // Build a reply to this connection by flipping the incoming actor name
+    // so that we can forward the message along to the recepient listening
+    // for the same action on the same channel
     var responseChannelName = [
       connInfo.type === 'speaker' ? 'broadcaster' : 'speaker',
       connInfo.channel,
@@ -118,6 +108,5 @@ io.sockets.on('connection', function (socket) {
 
     console.log("Forwarding on to ", responseChannelName);
     socket.broadcast.emit(responseChannelName, conn.data);
-
   });
 });
